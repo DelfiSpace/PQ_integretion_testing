@@ -1,33 +1,24 @@
 #!/usr/bin/env python
 
 import sys
-import socket
-import time
+import pq_module as pq
+import pq_comms as pqc
+
+def process_frame(packet):
+    print "Hello from ", packet['Source']
 
 TCP_IP = '127.0.0.1'
-TCP_PORT = 5000
+TCP_PORT = 10000
 BUFFER_SIZE = 1024
 
 fname = sys.argv[1]
-time_prev =  time.time()
-time_new = 0
 
-print "Starting", time_prev
-
-f = open(fname,'a')
-
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((TCP_IP, TCP_PORT))
+pq_class = pqc.pq(TCP_IP, TCP_PORT, BUFFER_SIZE, fname, 10)
 
 while 1:
-    data = s.recv(BUFFER_SIZE)
-    f.write(data)
-    #print "received data:", data
-    time_new =  time.time()
-    if time_new - time_prev > 10*60:
-        print 'Still here', time_new
-        time_prev = time_new
-        f.flush()
 
-s.close()
-f.close()
+    packets, data = pq_class.get_packet()
+
+    #if not packets:
+    for packet in packets:
+        process_frame(packet)
