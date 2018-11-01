@@ -1,21 +1,34 @@
 import json
 import socket
 import time
+import signal
 
 class pq:
 
-    def __init__(self, ip, port, buffer_size, fname, log_period):
+    def __init__(self, ip, port, timeout, buffer_size, fname, log_period):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.settimeout(timeout)
         self.s.connect((ip, port))
         self.buf = ""
         self.buffer_size = buffer_size
+        self.data = ""
+
         self.f = open(fname,'a')
         self.log_period = log_period
         self.time_prev=  time.time()
         self.time_new =  0
 
-    def get_packet(self):
-        data = self.s.recv(self.buffer_size)
+    def close(self):
+        self.f.close()
+        self.s.close()
+
+    def get_data(self):
+        try:
+            data = self.s.recv(self.buffer_size)
+        except:
+            return ""
+
+        self.data += data
 
         self.f.write(data)
         #print "received data:", data
@@ -25,8 +38,13 @@ class pq:
             self.time_prev = self.time_new
             self.f.flush()
 
+        return data
+
+    def get_packets(self):
+
         packets = []
-        sps = data.splitlines(True)
+        sps = self.data.splitlines(True)
+        self.data = ""
         for sp in sps:
             self.buf += sp
             if "\n" in self.buf:
@@ -34,4 +52,14 @@ class pq:
                 self.buf = ""
                 packets.append(packet)
 
-        return packets, data
+        return packets
+
+    def ping(self, destination):
+        print "Sending"
+        msg = {}
+        msg['_send_'] = 'Ping'
+        msg['Destination'] = destination
+
+        packet = json.dumps(msg, ensure_ascii=False)
+        print packet
+        self.s.send(packet + "\n")
