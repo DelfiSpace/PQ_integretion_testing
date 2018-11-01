@@ -11,7 +11,7 @@ import sys
 def signal_handler(sig, frame):
     global working
     working = False
-    print('You pressed Ctrl+C!')
+    print('Closing in a minute :)')
     pq_class.close()
     sys.exit(0)
 
