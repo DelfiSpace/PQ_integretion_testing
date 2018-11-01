@@ -26,7 +26,8 @@ def get_packets():
 def send_packets():
     global working
     while working:
-        pq_class.ping("OBC")
+        #pq_class.ping("OBC")
+        pq_class.send_raw("1", "1", "0 0 17 1")
         time.sleep(30)
         packets = pq_class.get_packets()
         #print packets
