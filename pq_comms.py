@@ -54,6 +54,29 @@ class pq:
 
         return packets
 
+    def send_raw(self, source, destination, raw):
+        """ Sending raw requires the IDs of the subsystem instead of the string.
+            OBC 1
+            EPS 2
+            ADB 3
+            COMMS 4
+            ADCS 5
+
+            example send_raw("1", "1", "0 0 17 1")
+            1 is OBC
+            data: 0 0 for packet Counter
+            17 for Service
+            1 for subtype
+        """
+        msg = {}
+        msg['_send_'] = 'SendRaw'
+        msg['dest'] = source
+        msg['src'] = destination
+        msg['data'] = raw
+        packet = json.dumps(msg, ensure_ascii=False)
+        print packet
+        self.s.send(packet + "\n")
+
     def ping(self, destination):
         print "Sending"
         msg = {}
